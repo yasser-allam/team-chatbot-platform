@@ -6,7 +6,6 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { fileToText, chunkText, embedText } from "@/lib/ingest";
 
 export async function createChatbot(formData: FormData) {
-  // 1. Verify the caller is an admin.
   const supabase = await createClient();
   const {
     data: { user },
@@ -31,7 +30,6 @@ export async function createChatbot(formData: FormData) {
     redirect("/admin/new?error=" + encodeURIComponent("Name and team are required."));
   }
 
-  // 2. Find or create the team (auto-create by name).
   let teamId: string;
   const { data: existingTeam } = await admin
     .from("teams")
@@ -50,7 +48,6 @@ export async function createChatbot(formData: FormData) {
     teamId = newTeam.id;
   }
 
-  // 3. Create the chatbot.
   const { data: bot, error: botErr } = await admin
     .from("chatbots")
     .insert({ name, team_id: teamId, instructions })
@@ -58,7 +55,6 @@ export async function createChatbot(formData: FormData) {
     .single();
   if (botErr || !bot) throw new Error("Could not create chatbot");
 
-  // 4. Gather knowledge sources: uploaded files + pasted text.
   const files = formData
     .getAll("files")
     .filter((f): f is File => f instanceof File && f.size > 0);
@@ -76,7 +72,9 @@ export async function createChatbot(formData: FormData) {
   }
   if (pasted) sources.push({ fileName: "Pasted text", text: pasted });
 
-  // 5. Ingest each source: chunk -> embed -> store (tagged with this bot's id).
+  let totalChunks = 0;
+  let firstError: string | null = null;
+
   for (const src of sources) {
     const { data: doc } = await admin
       .from("documents")
@@ -88,21 +86,33 @@ export async function createChatbot(formData: FormData) {
       const chunks = chunkText(src.text);
       for (const chunk of chunks) {
         const embedding = await embedText(chunk);
-        await admin.from("chunks").insert({
+        const { error: insErr } = await admin.from("chunks").insert({
           chatbot_id: bot.id,
           document_id: doc?.id ?? null,
           content: chunk,
-          embedding,
+          embedding: JSON.stringify(embedding),
         });
+        if (insErr) throw new Error("DB insert failed: " + insErr.message);
+        totalChunks++;
       }
       if (doc) {
         await admin.from("documents").update({ status: "ready" }).eq("id", doc.id);
       }
-    } catch {
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      firstError = firstError ?? msg;
+      console.error("[ingest] failed for", src.fileName, "-", msg);
       if (doc) {
         await admin.from("documents").update({ status: "error" }).eq("id", doc.id);
       }
     }
+  }
+
+  if (sources.length > 0 && totalChunks === 0 && firstError) {
+    redirect(
+      "/admin/new?error=" +
+        encodeURIComponent("Document processing failed: " + firstError)
+    );
   }
 
   redirect("/admin");
