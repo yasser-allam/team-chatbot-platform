@@ -16,13 +16,23 @@ export default async function ChatPage({
   } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role, team_id")
+    .eq("id", user.id)
+    .single();
+  const isAdmin = profile?.role === "admin";
+
   const admin = createAdminClient();
   const { data: bot } = await admin
     .from("chatbots")
-    .select("id, name, teams(name)")
+    .select("id, name, team_id, teams(name)")
     .eq("id", id)
     .single();
   if (!bot) notFound();
+
+  const botTeamId = (bot as { team_id: string | null }).team_id;
+  if (!isAdmin && botTeamId !== profile?.team_id) notFound();
 
   const t = (bot as { teams: unknown }).teams;
   const teamName = (Array.isArray(t) ? t[0]?.name : (t as { name?: string } | null)?.name) ?? "";
@@ -35,9 +45,7 @@ export default async function ChatPage({
             <p className="font-semibold text-gray-900">{bot.name}</p>
             {teamName && <p className="text-xs text-gray-500">{teamName} team</p>}
           </div>
-          <Link href="/chat" className="text-sm text-gray-500 hover:text-gray-900">
-            All bots
-          </Link>
+          <Link href="/chat" className="text-sm text-gray-500 hover:text-gray-900">All bots</Link>
         </div>
       </header>
       <ChatClient chatbotId={bot.id} botName={bot.name} />

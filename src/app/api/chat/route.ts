@@ -6,7 +6,6 @@ import { genai, CHAT_MODEL } from "@/lib/gemini";
 
 type Match = { id: string; content: string; similarity: number };
 
-// PostgREST sometimes types a to-one relation as an array; normalise it.
 function relName(rel: unknown): string | undefined {
   if (!rel) return undefined;
   const obj = Array.isArray(rel) ? rel[0] : rel;
@@ -28,15 +27,26 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Missing chatbotId or message" }, { status: 400 });
   }
 
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role, team_id")
+    .eq("id", user.id)
+    .single();
+  const isAdmin = profile?.role === "admin";
+
   const admin = createAdminClient();
   const { data: bot } = await admin
     .from("chatbots")
-    .select("name, instructions, teams(name)")
+    .select("name, instructions, team_id, teams(name)")
     .eq("id", chatbotId)
     .single();
   if (!bot) return NextResponse.json({ error: "Chatbot not found" }, { status: 404 });
 
-  // 1. Embed the question and find the closest chunks FOR THIS BOT ONLY.
+  const botTeamId = (bot as { team_id: string | null }).team_id;
+  if (!isAdmin && botTeamId !== profile?.team_id) {
+    return NextResponse.json({ error: "You don't have access to this chatbot." }, { status: 403 });
+  }
+
   let matches: Match[] = [];
   try {
     const embedding = await embedText(message);
@@ -54,7 +64,6 @@ export async function POST(req: Request) {
 
   const context = matches.map((m, i) => `[${i + 1}] ${m.content}`).join("\n\n");
 
-  // 2. Find which document(s) the matched chunks came from.
   let sources: string[] = [];
   if (matches.length) {
     const { data: rows } = await admin
@@ -67,7 +76,6 @@ export async function POST(req: Request) {
     sources = Array.from(new Set(names));
   }
 
-  // 3. Ask Gemini to answer using only that context.
   const teamName = relName((bot as { teams: unknown }).teams) ?? "the company";
   const instructions = (bot as { instructions: string | null }).instructions;
   const botName = (bot as { name: string }).name;

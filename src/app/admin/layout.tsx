@@ -2,7 +2,6 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 
-// Guards the whole /admin section: only users with role "admin" get in.
 export default async function AdminLayout({
   children,
 }: {
@@ -28,10 +27,7 @@ export default async function AdminLayout({
           <p className="mt-2 text-sm text-gray-500">
             This area is for managers. Ask an administrator for access.
           </p>
-          <Link
-            href="/"
-            className="mt-4 inline-block rounded-md bg-gray-900 px-4 py-2 text-sm font-medium text-white"
-          >
+          <Link href="/" className="mt-4 inline-block rounded-md bg-gray-900 px-4 py-2 text-sm font-medium text-white">
             Back to home
           </Link>
         </div>
@@ -43,12 +39,12 @@ export default async function AdminLayout({
     <div className="min-h-screen bg-gray-50">
       <header className="border-b border-gray-200 bg-white">
         <div className="mx-auto flex max-w-4xl items-center justify-between px-4 py-3">
-          <Link href="/admin" className="font-semibold text-gray-900">
-            Team Chatbots · Admin
-          </Link>
-          <Link href="/" className="text-sm text-gray-500 hover:text-gray-900">
-            Exit admin
-          </Link>
+          <div className="flex items-center gap-5">
+            <span className="font-semibold text-gray-900">Admin</span>
+            <Link href="/admin" className="text-sm text-gray-600 hover:text-gray-900">Chatbots</Link>
+            <Link href="/admin/users" className="text-sm text-gray-600 hover:text-gray-900">Users</Link>
+          </div>
+          <Link href="/" className="text-sm text-gray-500 hover:text-gray-900">Exit admin</Link>
         </div>
       </header>
       <div className="mx-auto max-w-4xl px-4 py-8">{children}</div>

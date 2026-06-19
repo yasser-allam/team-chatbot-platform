@@ -1,4 +1,4 @@
-import { login, signup } from "./actions";
+import { login } from "./actions";
 
 export default async function LoginPage({
   searchParams,
@@ -25,16 +25,17 @@ export default async function LoginPage({
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700">Password</label>
-            <input name="password" type="password" required minLength={6}
+            <input name="password" type="password" required
               className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:border-gray-900 focus:outline-none" />
           </div>
-          <div className="flex gap-2 pt-2">
-            <button formAction={login}
-              className="flex-1 rounded-md bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-800">Sign in</button>
-            <button formAction={signup}
-              className="flex-1 rounded-md border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">Sign up</button>
-          </div>
+          <button formAction={login}
+            className="w-full rounded-md bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-800">
+            Sign in
+          </button>
         </form>
+        <p className="mt-4 text-xs text-gray-400">
+          Accounts are created by your administrator. Contact them if you can&apos;t sign in.
+        </p>
       </div>
     </main>
   );
