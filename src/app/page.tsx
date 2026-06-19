@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 
@@ -17,7 +18,10 @@ export default async function Home() {
           <div className="flex justify-between"><dt className="text-gray-500">Email</dt><dd className="font-medium text-gray-900">{user.email}</dd></div>
           <div className="flex justify-between"><dt className="text-gray-500">Role</dt><dd className="font-medium text-gray-900">{profile?.role ?? "employee"}</dd></div>
         </dl>
-        <form action="/auth/signout" method="post" className="mt-6">
+        {profile?.role === "admin" && (
+          <Link href="/admin" className="mt-6 block rounded-md bg-gray-900 px-4 py-2 text-center text-sm font-medium text-white hover:bg-gray-800">Go to admin</Link>
+        )}
+        <form action="/auth/signout" method="post" className="mt-3">
           <button className="w-full rounded-md border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">Sign out</button>
         </form>
       </div>
