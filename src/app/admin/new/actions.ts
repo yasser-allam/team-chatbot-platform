@@ -3,7 +3,7 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { fileToText, chunkText, embedText } from "@/lib/ingest";
+import { ingestToBot } from "@/lib/ingest";
 
 export async function createChatbot(formData: FormData) {
   const supabase = await createClient();
@@ -60,55 +60,14 @@ export async function createChatbot(formData: FormData) {
     .filter((f): f is File => f instanceof File && f.size > 0);
   const pasted = String(formData.get("pasted") || "").trim();
 
-  const sources: { fileName: string; text: string }[] = [];
-  for (const f of files) {
-    try {
-      sources.push({ fileName: f.name, text: await fileToText(f) });
-    } catch {
-      await admin
-        .from("documents")
-        .insert({ chatbot_id: bot.id, file_name: f.name, status: "error" });
-    }
-  }
-  if (pasted) sources.push({ fileName: "Pasted text", text: pasted });
+  const { totalChunks, firstError, sourceCount } = await ingestToBot(
+    admin,
+    bot.id,
+    files,
+    pasted
+  );
 
-  let totalChunks = 0;
-  let firstError: string | null = null;
-
-  for (const src of sources) {
-    const { data: doc } = await admin
-      .from("documents")
-      .insert({ chatbot_id: bot.id, file_name: src.fileName, status: "processing" })
-      .select("id")
-      .single();
-
-    try {
-      const chunks = chunkText(src.text);
-      for (const chunk of chunks) {
-        const embedding = await embedText(chunk);
-        const { error: insErr } = await admin.from("chunks").insert({
-          chatbot_id: bot.id,
-          document_id: doc?.id ?? null,
-          content: chunk,
-          embedding: JSON.stringify(embedding),
-        });
-        if (insErr) throw new Error("DB insert failed: " + insErr.message);
-        totalChunks++;
-      }
-      if (doc) {
-        await admin.from("documents").update({ status: "ready" }).eq("id", doc.id);
-      }
-    } catch (e) {
-      const msg = e instanceof Error ? e.message : String(e);
-      firstError = firstError ?? msg;
-      console.error("[ingest] failed for", src.fileName, "-", msg);
-      if (doc) {
-        await admin.from("documents").update({ status: "error" }).eq("id", doc.id);
-      }
-    }
-  }
-
-  if (sources.length > 0 && totalChunks === 0 && firstError) {
+  if (sourceCount > 0 && totalChunks === 0 && firstError) {
     redirect(
       "/admin/new?error=" +
         encodeURIComponent("Document processing failed: " + firstError)

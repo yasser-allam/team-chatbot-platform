@@ -2,7 +2,13 @@
 
 import { useFormStatus } from "react-dom";
 
-export function SubmitButton() {
+export function SubmitButton({
+  idle = "Create chatbot",
+  pendingLabel = "Creating… processing documents",
+}: {
+  idle?: string;
+  pendingLabel?: string;
+}) {
   const { pending } = useFormStatus();
   return (
     <button
@@ -10,7 +16,7 @@ export function SubmitButton() {
       disabled={pending}
       className="rounded-md bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-800 disabled:opacity-60"
     >
-      {pending ? "Creating… processing documents" : "Create chatbot"}
+      {pending ? pendingLabel : idle}
     </button>
   );
 }

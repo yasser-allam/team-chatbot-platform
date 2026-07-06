@@ -44,18 +44,19 @@ export default async function AdminDashboard() {
       ) : (
         <ul className="mt-6 space-y-3">
           {bots.map((bot) => (
-            <li
-              key={bot.id}
-              className="rounded-xl border border-gray-200 bg-white p-4"
-            >
-              <div className="flex items-center justify-between">
+            <li key={bot.id}>
+              <Link
+                href={`/admin/${bot.id}`}
+                className="flex items-center justify-between rounded-xl border border-gray-200 bg-white p-4 hover:border-gray-400"
+              >
                 <div>
                   <p className="font-medium text-gray-900">{bot.name}</p>
                   <p className="text-xs text-gray-500">
                     Team: {bot.teams?.name ?? "—"}
                   </p>
                 </div>
-              </div>
+                <span className="text-sm text-gray-400">Manage →</span>
+              </Link>
             </li>
           ))}
         </ul>
