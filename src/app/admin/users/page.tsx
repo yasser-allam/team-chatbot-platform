@@ -18,36 +18,37 @@ export default async function UsersPage() {
 
   return (
     <div>
-      <div className="flex items-center justify-between">
+      <div className="flex items-end justify-between gap-4">
         <div>
-          <h1 className="text-xl font-semibold text-gray-900">Users</h1>
-          <p className="mt-1 text-sm text-gray-500">
+          <h1 className="font-display text-3xl font-semibold tracking-tight text-ink">
+            Users
+          </h1>
+          <p className="mt-1.5 text-ink-soft">
             People who can sign in, and which team they belong to.
           </p>
         </div>
-        <Link
-          href="/admin/users/new"
-          className="rounded-md bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-800"
-        >
+        <Link href="/admin/users/new" className="btn btn-primary shrink-0">
           + Add user
         </Link>
       </div>
 
-      <div className="mt-6 overflow-hidden rounded-xl border border-gray-200 bg-white">
+      <div className="card mt-6 overflow-hidden p-0">
         <table className="w-full text-sm">
-          <thead className="bg-gray-50 text-left text-xs uppercase text-gray-500">
+          <thead className="bg-sage-50 text-left text-xs font-semibold uppercase tracking-wide text-sage-700">
             <tr>
-              <th className="px-4 py-2">Email</th>
-              <th className="px-4 py-2">Role</th>
-              <th className="px-4 py-2">Team</th>
+              <th className="px-5 py-3">Email</th>
+              <th className="px-5 py-3">Role</th>
+              <th className="px-5 py-3">Team</th>
             </tr>
           </thead>
           <tbody>
             {users.map((u) => (
-              <tr key={u.id} className="border-t border-gray-100">
-                <td className="px-4 py-2 text-gray-900">{u.email ?? "—"}</td>
-                <td className="px-4 py-2 text-gray-600">{u.role}</td>
-                <td className="px-4 py-2 text-gray-600">{u.teams?.name ?? "—"}</td>
+              <tr key={u.id} className="border-t border-line">
+                <td className="px-5 py-3 text-ink">{u.email ?? "—"}</td>
+                <td className="px-5 py-3">
+                  <span className="chip">{u.role}</span>
+                </td>
+                <td className="px-5 py-3 text-ink-soft">{u.teams?.name ?? "—"}</td>
               </tr>
             ))}
           </tbody>

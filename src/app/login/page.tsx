@@ -1,4 +1,5 @@
 import { login } from "./actions";
+import { LeafMark } from "@/components/brand";
 
 export default async function LoginPage({
   searchParams,
@@ -7,34 +8,48 @@ export default async function LoginPage({
 }) {
   const params = await searchParams;
   return (
-    <main className="flex min-h-screen items-center justify-center bg-gray-50 p-4">
-      <div className="w-full max-w-sm rounded-2xl bg-white p-8 shadow-sm">
-        <h1 className="text-xl font-semibold text-gray-900">Team Chatbots</h1>
-        <p className="mt-1 text-sm text-gray-500">Sign in to continue</p>
-        {params.error && (
-          <p className="mt-4 rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">{params.error}</p>
-        )}
-        {params.message && (
-          <p className="mt-4 rounded-md bg-green-50 px-3 py-2 text-sm text-green-700">{params.message}</p>
-        )}
-        <form className="mt-6 space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Email</label>
-            <input name="email" type="email" required
-              className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:border-gray-900 focus:outline-none" />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Password</label>
-            <input name="password" type="password" required
-              className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:border-gray-900 focus:outline-none" />
-          </div>
-          <button formAction={login}
-            className="w-full rounded-md bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-800">
-            Sign in
-          </button>
-        </form>
-        <p className="mt-4 text-xs text-gray-400">
-          Accounts are created by your administrator. Contact them if you can&apos;t sign in.
+    <main className="flex min-h-screen items-center justify-center p-4">
+      <div className="w-full max-w-sm rise">
+        <div className="mb-6 flex flex-col items-center text-center">
+          <LeafMark size={48} />
+          <h1 className="mt-4 font-display text-3xl font-semibold tracking-tight text-ink">
+            Welcome to Sage
+          </h1>
+          <p className="mt-1.5 text-sm text-ink-soft">
+            Your team&apos;s knowledge, one question away.
+          </p>
+        </div>
+
+        <div className="card p-7">
+          {params.error && (
+            <p className="mb-4 rounded-xl bg-[#fbece7] px-3 py-2 text-sm text-[#b0472e]">
+              {params.error}
+            </p>
+          )}
+          {params.message && (
+            <p className="mb-4 rounded-xl bg-sage-50 px-3 py-2 text-sm text-sage-700">
+              {params.message}
+            </p>
+          )}
+          <form className="space-y-4">
+            <div>
+              <label className="label">Email</label>
+              <input name="email" type="email" required className="field" placeholder="you@company.com" />
+            </div>
+            <div>
+              <label className="label">Password</label>
+              <input name="password" type="password" required className="field" placeholder="••••••••" />
+            </div>
+            <button formAction={login} className="btn btn-primary w-full">
+              Sign in
+            </button>
+          </form>
+        </div>
+
+        <p className="mt-5 text-center text-xs text-ink-soft">
+          Accounts are created by your administrator.
+          <br />
+          Contact them if you can&apos;t sign in.
         </p>
       </div>
     </main>

@@ -1,26 +1,162 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+/* ============================================================
+   Sage — warm & approachable design system
+   ============================================================ */
+@theme {
+  /* Warm neutrals */
+  --color-cream: #faf6ee;
+  --color-surface: #ffffff;
+  --color-ink: #2f2a23;
+  --color-ink-soft: #6f665a;
+  --color-line: #ece3d5;
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+  /* Sage (primary) */
+  --color-sage-50: #eef2ea;
+  --color-sage-100: #dce6d3;
+  --color-sage-200: #c2d5b6;
+  --color-sage-500: #6f8f62;
+  --color-sage-600: #5b7850;
+  --color-sage-700: #48603f;
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  /* Clay (warm accent) */
+  --color-clay: #c67c58;
+
+  --font-sans: var(--font-hanken);
+  --font-display: var(--font-fraunces);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: var(--color-cream);
+  background-image: radial-gradient(
+    1100px 480px at 50% -12%,
+    rgba(111, 143, 98, 0.12),
+    transparent 70%
+  );
+  background-attachment: fixed;
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+@layer components {
+  .card {
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-line);
+    border-radius: 1.25rem;
+    box-shadow:
+      0 1px 2px rgba(58, 48, 33, 0.04),
+      0 20px 44px -26px rgba(58, 48, 33, 0.28);
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    border-radius: 9999px;
+    padding: 0.62rem 1.15rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition:
+      transform 0.15s ease,
+      background-color 0.15s ease,
+      border-color 0.15s ease,
+      color 0.15s ease,
+      box-shadow 0.15s ease;
+  }
+  .btn:active {
+    transform: translateY(1px);
+  }
+  .btn-primary {
+    background-color: var(--color-sage-600);
+    color: #fff;
+    box-shadow: 0 8px 18px -10px rgba(91, 120, 80, 0.7);
+  }
+  .btn-primary:hover {
+    background-color: var(--color-sage-700);
+  }
+  .btn-primary:disabled {
+    opacity: 0.55;
+    cursor: default;
+  }
+  .btn-secondary {
+    background-color: var(--color-surface);
+    color: var(--color-ink);
+    border: 1px solid var(--color-line);
+  }
+  .btn-secondary:hover {
+    border-color: var(--color-sage-500);
+    color: var(--color-sage-700);
+  }
+  .btn-danger {
+    background-color: #fff;
+    color: #b0472e;
+    border: 1px solid #e7c6ba;
+  }
+  .btn-danger:hover {
+    background-color: #fbf1ec;
+  }
+
+  .field {
+    width: 100%;
+    border-radius: 0.85rem;
+    border: 1px solid var(--color-line);
+    background-color: #fff;
+    padding: 0.6rem 0.8rem;
+    font-size: 0.875rem;
+    color: var(--color-ink);
+    transition:
+      border-color 0.15s ease,
+      box-shadow 0.15s ease;
+  }
+  .field::placeholder {
+    color: #b6ac98;
+  }
+  .field:focus {
+    outline: none;
+    border-color: var(--color-sage-500);
+    box-shadow: 0 0 0 3px rgba(111, 143, 98, 0.16);
+  }
+
+  .label {
+    display: block;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--color-ink);
+    margin-bottom: 0.3rem;
+  }
+  .hint {
+    font-size: 0.75rem;
+    color: var(--color-ink-soft);
+  }
+
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    border-radius: 9999px;
+    padding: 0.15rem 0.6rem;
+    font-size: 0.72rem;
+    font-weight: 600;
+    background-color: var(--color-sage-50);
+    color: var(--color-sage-700);
+  }
+}
+
+@layer utilities {
+  @keyframes rise {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+  .rise {
+    animation: rise 0.5s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  }
 }

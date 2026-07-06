@@ -8,7 +8,7 @@ export function ConfirmButton({
   message,
   idle,
   pendingLabel = "Working…",
-  className = "rounded-md border border-red-300 px-3 py-1.5 text-sm font-medium text-red-700 hover:bg-red-50 disabled:opacity-60",
+  className = "btn btn-danger",
 }: {
   message: string;
   idle: string;

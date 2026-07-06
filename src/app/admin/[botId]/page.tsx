@@ -20,8 +20,19 @@ type Doc = {
   created_at: string;
 };
 
-const input =
-  "mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:border-gray-900 focus:outline-none";
+function StatusPill({ status }: { status: string }) {
+  const styles =
+    status === "ready"
+      ? "bg-sage-50 text-sage-700"
+      : status === "error"
+        ? "bg-[#fbece7] text-[#b0472e]"
+        : "bg-[#fbf3e2] text-[#a9762a]";
+  return (
+    <span className={`rounded-full px-2 py-0.5 text-[11px] font-semibold ${styles}`}>
+      {status}
+    </span>
+  );
+}
 
 export default async function BotDetailPage({
   params,
@@ -51,49 +62,54 @@ export default async function BotDetailPage({
   const docs = (docData ?? []) as Doc[];
 
   return (
-    <div className="space-y-8">
+    <div className="mx-auto max-w-2xl space-y-6">
       <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-xl font-semibold text-gray-900">{bot.name}</h1>
-          <p className="mt-1 text-sm text-gray-500">Team: {bot.teams?.name ?? "—"}</p>
+        <div className="flex items-center gap-3">
+          <span className="grid h-11 w-11 place-items-center rounded-xl bg-sage-100 text-xl">
+            💬
+          </span>
+          <div>
+            <h1 className="font-display text-2xl font-semibold tracking-tight text-ink">
+              {bot.name}
+            </h1>
+            <p className="text-sm text-ink-soft">{bot.teams?.name ?? "—"} team</p>
+          </div>
         </div>
-        <Link href="/admin" className="text-sm text-gray-500 hover:text-gray-900">
+        <Link href="/admin" className="btn btn-ghost text-sm">
           ← All chatbots
         </Link>
       </div>
 
       {error && (
-        <p className="rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>
+        <p className="rounded-xl bg-[#fbece7] px-3 py-2 text-sm text-[#b0472e]">{error}</p>
       )}
       {saved && !error && (
-        <p className="rounded-md bg-green-50 px-3 py-2 text-sm text-green-700">Saved.</p>
+        <p className="rounded-xl bg-sage-50 px-3 py-2 text-sm text-sage-700">Saved.</p>
       )}
 
       {/* Edit settings */}
-      <section className="rounded-xl border border-gray-200 bg-white p-5">
-        <h2 className="text-sm font-semibold text-gray-900">Settings</h2>
+      <section className="card p-6">
+        <h2 className="font-display text-lg font-semibold text-ink">Settings</h2>
         <form action={updateChatbot} className="mt-4 space-y-4">
           <input type="hidden" name="botId" value={bot.id} />
           <div>
-            <label className="block text-sm font-medium text-gray-700">Name</label>
-            <input name="name" defaultValue={bot.name} required className={input} />
+            <label className="label">Name</label>
+            <input name="name" defaultValue={bot.name} required className="field" />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700">Team</label>
-            <input name="team" defaultValue={bot.teams?.name ?? ""} required className={input} />
-            <p className="mt-1 text-xs text-gray-400">
+            <label className="label">Team</label>
+            <input name="team" defaultValue={bot.teams?.name ?? ""} required className="field" />
+            <p className="hint mt-1">
               Only this team&apos;s members (and admins) can use the bot. Created if new.
             </p>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Instructions (optional)
-            </label>
+            <label className="label">Instructions (optional)</label>
             <textarea
               name="instructions"
               defaultValue={bot.instructions ?? ""}
               rows={3}
-              className={input}
+              className="field"
               placeholder="e.g. Answer briefly and politely."
             />
           </div>
@@ -102,36 +118,26 @@ export default async function BotDetailPage({
       </section>
 
       {/* Documents */}
-      <section className="rounded-xl border border-gray-200 bg-white p-5">
-        <h2 className="text-sm font-semibold text-gray-900">
-          Documents{" "}
-          <span className="font-normal text-gray-400">({docs.length})</span>
+      <section className="card p-6">
+        <h2 className="font-display text-lg font-semibold text-ink">
+          Documents <span className="font-sans text-sm font-normal text-ink-soft">({docs.length})</span>
         </h2>
-        <p className="mt-1 text-xs text-gray-500">
-          The bot answers only from these documents. Remove one to make it forget that source.
+        <p className="hint mt-1">
+          The bot answers only from these. Remove one to make it forget that source.
         </p>
 
         {docs.length === 0 ? (
-          <p className="mt-4 text-sm text-gray-500">No documents yet.</p>
+          <p className="mt-4 text-sm text-ink-soft">No documents yet.</p>
         ) : (
-          <ul className="mt-4 divide-y divide-gray-100">
+          <ul className="mt-4 divide-y divide-line">
             {docs.map((d) => (
-              <li key={d.id} className="flex items-center justify-between py-2.5">
-                <div className="min-w-0">
-                  <p className="truncate text-sm text-gray-900">{d.file_name}</p>
-                  <p className="text-xs text-gray-400">
-                    <span
-                      className={
-                        d.status === "ready"
-                          ? "text-green-600"
-                          : d.status === "error"
-                            ? "text-red-600"
-                            : "text-amber-600"
-                      }
-                    >
-                      {d.status}
-                    </span>
-                  </p>
+              <li key={d.id} className="flex items-center justify-between gap-3 py-3">
+                <div className="flex min-w-0 items-center gap-3">
+                  <span className="text-lg">📄</span>
+                  <div className="min-w-0">
+                    <p className="truncate text-sm text-ink">{d.file_name}</p>
+                    <p className="mt-0.5"><StatusPill status={d.status} /></p>
+                  </div>
                 </div>
                 <form action={deleteDocument}>
                   <input type="hidden" name="botId" value={bot.id} />
@@ -140,7 +146,7 @@ export default async function BotDetailPage({
                     message={`Remove "${d.file_name}"? The bot will forget it.`}
                     idle="Remove"
                     pendingLabel="Removing…"
-                    className="rounded-md border border-gray-300 px-3 py-1.5 text-xs font-medium text-gray-600 hover:bg-gray-50 disabled:opacity-60"
+                    className="btn btn-secondary px-3 py-1.5 text-xs"
                   />
                 </form>
               </li>
@@ -149,32 +155,34 @@ export default async function BotDetailPage({
         )}
 
         {/* Add documents */}
-        <form action={addDocuments} className="mt-6 space-y-4 border-t border-gray-100 pt-5">
+        <form action={addDocuments} className="mt-6 space-y-4 border-t border-line pt-5">
           <input type="hidden" name="botId" value={bot.id} />
-          <h3 className="text-sm font-medium text-gray-800">Add documents</h3>
+          <h3 className="text-sm font-semibold text-ink">Add documents</h3>
           <div>
-            <label className="block text-sm font-medium text-gray-700">Upload files</label>
+            <label className="label">Upload files</label>
             <input
               name="files"
               type="file"
               multiple
               accept=".pdf,.docx,.txt,.md"
-              className="mt-1 block w-full text-sm text-gray-600 file:mr-3 file:rounded-md file:border-0 file:bg-gray-900 file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-white"
+              className="mt-1 block w-full text-sm text-ink-soft file:mr-3 file:rounded-lg file:border-0 file:bg-sage-600 file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-white hover:file:bg-sage-700"
             />
-            <p className="mt-1 text-xs text-gray-400">PDF, Word (.docx), .txt or .md.</p>
+            <p className="hint mt-1">PDF, Word (.docx), .txt or .md.</p>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700">Or paste text</label>
-            <textarea name="pasted" rows={3} className={input} placeholder="Paste policy text here…" />
+            <label className="label">Or paste text</label>
+            <textarea name="pasted" rows={3} className="field" placeholder="Paste policy text here…" />
           </div>
           <SubmitButton idle="Add documents" pendingLabel="Adding… processing documents" />
         </form>
       </section>
 
       {/* Danger zone */}
-      <section className="rounded-xl border border-red-200 bg-white p-5">
-        <h2 className="text-sm font-semibold text-red-700">Delete this chatbot</h2>
-        <p className="mt-1 text-xs text-gray-500">
+      <section className="card border-[#e7c6ba] p-6">
+        <h2 className="font-display text-lg font-semibold text-[#b0472e]">
+          Delete this chatbot
+        </h2>
+        <p className="hint mt-1">
           Permanently removes the bot and all its documents. This cannot be undone.
         </p>
         <form action={deleteChatbot} className="mt-4">
